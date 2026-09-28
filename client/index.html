@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Zero Trust Enterprise Security 2.0 | Continuous Verification SOC</title>
+    <meta name="description" content="NIST SP 800-207 Zero Trust Architecture Control Plane, Micro-Segmentation, and Continuous Verification Engine" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="./src/style.css" />
+  </head>
+  <body>
+    <!-- Top Navigation Header -->
+    <header class="app-header">
+      <div class="header-left">
+        <div class="logo-container">
+          <div class="logo-shield">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+              <path d="m9 12 2 2 4-4"/>
+            </svg>
+          </div>
+          <div>
+            <div class="brand-title">ZERO TRUST <span class="accent-text">2.0</span></div>
+            <div class="brand-subtitle">NIST SP 800-207 Control Plane & SOC</div>
+          </div>
+        </div>
+        <div class="status-indicator">
+          <span class="status-dot pulsing"></span>
+          <span id="gateway-status-text">GATEWAY ONLINE</span>
+        </div>
+      </div>
+
+      <!-- Quick Identity Context Switcher -->
+      <div class="header-right">
+        <div class="identity-badge-container">
+          <span class="identity-label">ACTIVE IDENTITY</span>
+          <div class="user-select-wrapper">
+            <select id="active-user-select" class="user-select" title="Switch User Identity">
+              <option value="usr-admin-01">admin (Global SecOps Admin)</option>
+              <option value="usr-sec-01">analyst (Tier-3 SOC Analyst)</option>
+              <option value="usr-emp-01">john.doe (Engineering Staff)</option>
+              <option value="usr-guest-01">vendor.contractor (External Guest)</option>
+              <option value="usr-locked-01">compromised.user (Disabled/Compromised)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="quick-token-badge">
+          <span class="badge-dot" id="mfa-status-dot"></span>
+          <span id="mfa-status-text">MFA: ACTIVE</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- App Navigation Tabs -->
+    <nav class="sub-nav">
+      <button class="nav-tab active" data-tab="simulator">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="m16 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="m2 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="M7 21h10"/><path d="M12 3v18"/><path d="M3 7h2c2 0 5-1 7-2 2 1 5 2 7 2h2"/></svg>
+        Access Simulator
+      </button>
+      <button class="nav-tab" data-tab="scenarios">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v4"/><path d="m4.93 4.93 2.83 2.83"/><path d="M2 12h4"/><path d="m4.93 19.07 2.83-2.83"/><path d="M12 22v-4"/><path d="m19.07 19.07-2.83-2.83"/><path d="M22 12h-4"/><path d="m19.07 4.93-2.83 2.83"/><circle cx="12" cy="12" r="3"/></svg>
+        Threat Scenarios
+      </button>
+      <button class="nav-tab" data-tab="resources">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        Resource Vault
+      </button>
+      <button class="nav-tab" data-tab="topology">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><rect width="6" height="6" x="3" y="3" rx="1"/><rect width="6" height="6" x="15" y="3" rx="1"/><rect width="6" height="6" x="9" y="15" rx="1"/><path d="M6 9v3a3 3 0 0 0 3 3h6a3 3 0 0 0 3-3V9"/><path d="M12 12v3"/></svg>
+        Micro-Segmentation
+      </button>
+      <button class="nav-tab" data-tab="audit">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+        Audit Log & SOC
+      </button>
+    </nav>
+
+    <!-- Main Container -->
+    <main class="main-content">
+      
+      <!-- Top Metrics Bar -->
+      <section class="metrics-grid">
+        <div class="metric-card">
+          <div class="metric-label">TOTAL ACCESS EVALUATIONS</div>
+          <div class="metric-value" id="stat-total-requests">-</div>
+          <div class="metric-sub">Zero Trust Gateway Ingress</div>
+        </div>
+        <div class="metric-card blocked">
+          <div class="metric-label">POLICY BLOCKS & PREVENTIONS</div>
+          <div class="metric-value danger" id="stat-blocked-requests">-</div>
+          <div class="metric-sub" id="stat-block-rate">0% Block Rate</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">ACTIVE THREAT ALERTS</div>
+          <div class="metric-value warning" id="stat-threat-alerts">-</div>
+          <div class="metric-sub">High Risk / Anomalies</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">AVERAGE RISK POSTURE</div>
+          <div class="metric-value" id="stat-avg-risk">-</div>
+          <div class="metric-sub">Dynamic Score (0-100)</div>
+        </div>
+      </section>
+
+      <!-- TAB 1: ACCESS SIMULATOR -->
+      <section id="tab-simulator" class="tab-pane active">
+        <div class="pane-grid-2">
+          <!-- Request Parameters Form -->
+          <div class="glass-panel">
+            <div class="panel-header">
+              <h3>
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                Contextual Access Request Parameters
+              </h3>
+              <span class="badge-info">Continuous Verification Input</span>
+            </div>
+
+            <form id="simulator-form" class="sim-form">
+              <div class="form-group">
+                <label for="sim-resource">Target Enterprise Resource</label>
+                <select id="sim-resource" class="form-control" required></select>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="sim-role">Subject Role</label>
+                  <select id="sim-role" class="form-control">
+                    <option value="admin">Administrator (Full Privilege)</option>
+                    <option value="security_analyst">Security Analyst (SecOps)</option>
+                    <option value="employee" selected>Employee (Standard)</option>
+                    <option value="guest">Guest / External Contractor</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label for="sim-action">Intended Action</label>
+                  <select id="sim-action" class="form-control">
+                    <option value="READ">READ (Data Query)</option>
+                    <option value="WRITE">WRITE (Modify Resource)</option>
+                    <option value="ADMINISTER">ADMINISTER (Full Control)</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="sim-device">Host Device Trust Posture</label>
+                  <select id="sim-device" class="form-control">
+                    <option value="trusted">Trusted (Corporate Managed & Compliant)</option>
+                    <option value="managed">Managed (BYOD with MDM Profile)</option>
+                    <option value="untrusted">Untrusted (Unknown / Personal Endpoint)</option>
+                    <option value="compromised">Compromised (Active Malware / EDR Flag)</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label for="sim-segment">Network Ingress Segment</label>
+                  <select id="sim-segment" class="form-control"></select>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <div class="slider-header">
+                  <label for="sim-risk">Contextual Risk Score</label>
+                  <span id="risk-score-display" class="risk-pill low">15 (Low Risk)</span>
+                </div>
+                <input type="range" id="sim-risk" min="0" max="100" value="15" class="risk-slider" />
+                <div class="slider-ticks">
+                  <span>0 (Benign)</span>
+                  <span>50 (Moderate)</span>
+                  <span>100 (Critical Anomaly)</span>
+                </div>
+              </div>
+
+              <div class="form-row-checkboxes">
+                <label class="checkbox-container">
+                  <input type="checkbox" id="sim-mfa" />
+                  <span class="checkmark"></span>
+                  <span class="checkbox-text">Step-Up MFA Session Verified (TOTP Confirmed)</span>
+                </label>
+              </div>
+
+              <div class="form-actions">
+                <button type="submit" id="btn-evaluate" class="btn btn-primary">
+                  <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                  Evaluate Zero Trust Policy
+                </button>
+                <button type="button" id="btn-reset-sim" class="btn btn-secondary">Reset Context</button>
+              </div>
+            </form>
+          </div>
+
+          <!-- Evaluation Results Display -->
+          <div class="glass-panel" id="eval-result-panel">
+            <div class="panel-header">
+              <h3>
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                Zero Trust Verification Decision Matrix
+              </h3>
+              <span class="badge-info" id="eval-policy-name">Default Deny Matrix</span>
+            </div>
+
+            <div id="eval-empty-state" class="empty-state">
+              <div class="empty-icon">🛡️</div>
+              <h4>Awaiting Access Evaluation</h4>
+              <p>Configure contextual parameters or select a threat scenario to initiate multi-checkpoint verification.</p>
+            </div>
+
+            <div id="eval-content" class="eval-content hidden">
+              <!-- Big Banner Decision -->
+              <div id="eval-banner" class="eval-banner allow">
+                <div class="decision-icon" id="banner-icon">✓</div>
+                <div>
+                  <div class="decision-title" id="banner-title">ACCESS GRANTED</div>
+                  <div class="decision-reason" id="banner-reason">Continuous verification satisfied all dynamic checkpoints.</div>
+                </div>
+                <div class="decision-risk">
+                  <span class="risk-title">Calculated Risk</span>
+                  <span class="risk-val" id="banner-risk">25/100</span>
+                </div>
+              </div>
+
+              <!-- 6 Zero Trust Checkpoints Grid -->
+              <div class="checkpoints-grid">
+                <div class="checkpoint-card" id="chk-identity">
+                  <div class="chk-status">✓</div>
+                  <div class="chk-body">
+                    <div class="chk-title">1. Identity Verification</div>
+                    <div class="chk-detail" id="chk-identity-txt">-</div>
+                  </div>
+                </div>
+                <div class="checkpoint-card" id="chk-device">
+                  <div class="chk-status">✓</div>
+                  <div class="chk-body">
+                    <div class="chk-title">2. Device Posture & EDR</div>
+                    <div class="chk-detail" id="chk-device-txt">-</div>
+                  </div>
+                </div>
+                <div class="checkpoint-card" id="chk-role">
+                  <div class="chk-status">✓</div>
+                  <div class="chk-body">
+                    <div class="chk-title">3. Least-Privilege Role</div>
+                    <div class="chk-detail" id="chk-role-txt">-</div>
+                  </div>
+                </div>
+                <div class="checkpoint-card" id="chk-mfa">
+                  <div class="chk-status">✓</div>
+                  <div class="chk-body">
+                    <div class="chk-title">4. Step-up MFA Challenge</div>
+                    <div class="chk-detail" id="chk-mfa-txt">-</div>
+                  </div>
+                </div>
+                <div class="checkpoint-card" id="chk-risk">
+                  <div class="chk-status">✓</div>
+                  <div class="chk-body">
+                    <div class="chk-title">5. Anomaly Risk Tolerance</div>
+                    <div class="chk-detail" id="chk-risk-txt">-</div>
+                  </div>
+                </div>
+                <div class="checkpoint-card" id="chk-segment">
+                  <div class="chk-status">✓</div>
+                  <div class="chk-body">
+                    <div class="chk-title">6. Micro-Segmentation Barrier</div>
+                    <div class="chk-detail" id="chk-segment-txt">-</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Audit Stamp -->
+              <div class="audit-stamp">
+                <span>Evaluated at: <strong id="eval-timestamp">-</strong></span>
+                <span>Enforced by: <strong>Policy Engine v2.0</strong></span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 2: THREAT SCENARIOS -->
+      <section id="tab-scenarios" class="tab-pane">
+        <div class="pane-header-row">
+          <div>
+            <h2>Red Team Attack & Anomaly Scenarios</h2>
+            <p>Select real-world attack vectors to test automated Zero Trust defense mechanisms in real time.</p>
+          </div>
+          <button id="btn-inject-threat" class="btn btn-warning">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+            Inject Simulated Threat Vector
+          </button>
+        </div>
+
+        <div class="scenarios-grid" id="scenarios-container">
+          <!-- Dynamically populated -->
+        </div>
+      </section>
+
+      <!-- TAB 3: RESOURCE VAULT -->
+      <section id="tab-resources" class="tab-pane">
+        <div class="pane-header-row">
+          <div>
+            <h2>Protected Enterprise Resources & AES-256 Vault</h2>
+            <p>Every asset requires continuous verification. Valid sessions unlock cryptographically encrypted payloads.</p>
+          </div>
+        </div>
+
+        <div class="resources-grid" id="resources-container">
+          <!-- Dynamically populated -->
+        </div>
+      </section>
+
+      <!-- TAB 4: MICRO-SEGMENTATION TOPOLOGY -->
+      <section id="tab-topology" class="tab-pane">
+        <div class="pane-header-row">
+          <div>
+            <h2>Micro-Segmentation Network Architecture</h2>
+            <p>Strict lateral movement prevention: Workstations, DMZ, Application Core, and Vault Isolation.</p>
+          </div>
+        </div>
+
+        <!-- Segments Visual Cards -->
+        <div class="segments-grid" id="segments-container"></div>
+
+        <!-- Firewall Rules Table -->
+        <div class="glass-panel mt-4">
+          <div class="panel-header">
+            <h3>Micro-Segmentation Dynamic Inter-Segment Firewall Rules</h3>
+          </div>
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Source Segment</th>
+                  <th>Target Segment</th>
+                  <th>Protocol / Port</th>
+                  <th>Zero Trust Status</th>
+                  <th>Description</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="rules-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 5: AUDIT LOG & SOC -->
+      <section id="tab-audit" class="tab-pane">
+        <div class="pane-header-row">
+          <div>
+            <h2>Continuous Security Event & Audit Log</h2>
+            <p>Tamper-resistant immutable trail of access requests, MFA challenges, and blocked lateral movement.</p>
+          </div>
+          <div class="filter-group">
+            <select id="audit-filter-decision" class="form-control-sm">
+              <option value="">All Decisions (ALLOW & DENY)</option>
+              <option value="ALLOW">ALLOW Only</option>
+              <option value="DENY">DENY / Blocked Only</option>
+            </select>
+            <button id="btn-refresh-audit" class="btn btn-secondary btn-sm">Refresh Stream</button>
+          </div>
+        </div>
+
+        <div class="glass-panel">
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Timestamp</th>
+                  <th>Decision</th>
+                  <th>Event Type</th>
+                  <th>User / Role</th>
+                  <th>Target Resource</th>
+                  <th>Risk</th>
+                  <th>Device Posture</th>
+                  <th>Reason</th>
+                </tr>
+              </thead>
+              <tbody id="audit-tbody">
+                <tr><td colspan="8" class="text-center">Loading audit events...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- Modal for Resource Decrypted Payload View -->
+    <div id="resource-modal" class="modal-backdrop hidden">
+      <div class="modal-box">
+        <div class="modal-header">
+          <h3 id="modal-title">Decrypted Resource Data</h3>
+          <button id="modal-close" class="modal-close-btn">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div class="modal-badge-row">
+            <span class="tag-sensitivity" id="modal-sensitivity">CRITICAL</span>
+            <span class="tag-segment" id="modal-segment">PROD_VAULT</span>
+            <span class="tag-crypto">AES-256-GCM Hardware Decrypted</span>
+          </div>
+          <div class="payload-box">
+            <pre><code id="modal-payload-code"></code></pre>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Toast Notification container -->
+    <div id="toast-container" class="toast-container"></div>
+
+    <script type="module" src="./src/main.js"></script>
+  </body>
+</html>
